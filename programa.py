@@ -1,9 +1,17 @@
 from asyncio.windows_events import NULL
 from distutils.log import error
 from msilib.schema import tables
+from operator import index
 from turtle import pd
 from xmlrpc.client import Transport
 import pandas as pd
+
+
+def salvar_Xcel(dados):
+    print(dados)
+    dados.to_excel('Dados_Gastos.xls', index=False)
+    print("Salvo com sucesso")
+
 
 
 
@@ -48,25 +56,49 @@ def mudar(resp):
     #
 
 
-    sair = mudar(str(input("Deseja encerrar o cadastro das vacas? s/n \n")).split()[0].upper())
+def litros_pordia( numero_vacas_em_ordenha,alimetacao):
+    if alimetacao == 'racao' :
+        quanti_leite = numero_vacas_em_ordenha * 10
+        print("A quantidade de leite que deverá ser produzida é de {}.".format(quanti_leite))
+    elif alimetacao == 'pastagem':
+        quanti_leite = numero_vacas_em_ordenha * 7
+        print("A quantidade de leite que deverá ser produzida é de {}.".format(quanti_leite))
     
-   
+
+    
+def cadastro_vacas():
+    numero_vacas_total = int(input("Digite a quantidade de vacas que voce possui: "))
+    resp = mudar(str(input("Tem alguma que nao estão produzindo leite no momento? s/n \n")).split()[0].upper())
+    if resp == True:
+        vacas_restringidas = int(input("Digite a quantidade de vacas Restringidas: "))
+        numero_vacas = numero_vacas_total - vacas_restringidas
+    
+
 
 def gastos(sair = False):
     while (sair == False):
         nome_gasto = str(input("Digite o gasto: ops: \n *Alimentaçao\n *Trabalhadores\n *Transporte\n *Manutenção: "))
         quanto_gasta = float(input("Digite o valor do gasto no mês: "))
+        qual_mes = str(input("Digite o mês do gasto: "))
         salvar = input("Deseja salvar os dados: S/N ").upper().split()[0]
         salvar = mudar(salvar)
+        
         if  (salvar == True) :
-            dados = pd.read_excel("Dados_Gastos.xls")
-            dados = dados.append({'Gasto' : nome_gasto , 'Valor' : quanto_gasta})
-            dados.to_excel('Dados_Gastos.xls', index = False)
-            return(print(" !!! Salvamento Completo !!! "))
-        else :
-            return(print("Deseja fazer"))
+            try:
+                dados = pd.DataFrame(pd.read_excel("Dados_Gastos.xls"))
+                print(dados)
+                dados2 = pd.Series([nome_gasto,quanto_gasta,qual_mes], index=['Nome Gastos', 'Valor Gasto','Mês'])
+                print(dados2)
+                salvar_Xcel(dados.append(dados2,ignore_index= True))
+            except :
+                dados = pd.DataFrame([[nome_gasto, quanto_gasta,qual_mes]], index=['row 1'],columns=['Nome Gastos', 'Valor Gasto', 'Mês'])
+                salvar_Xcel(dados)
 
-    sair = mudar(str(input("Deseja encerrar o cadastro das vacas? s/n \n")).split()[0].upper())
+        sair = mudar(str(input("Deseja encerrar o cadastro de Gastos? s/n \n")).split()[0].upper())
+
+    
+
+
         
     return NULL
 
